@@ -269,7 +269,7 @@ const SECTIONS=[
 ];
 const COATS={kasztan:{n:'Kasztan',b:'#a5552a',m:'#5a2a12'},gniady:{n:'Gniady',b:'#7a4424',m:'#1e1410'},bulany:{n:'Bułany',b:'#d8b06a',m:'#2a1c14'},
  siwy:{n:'Arab siwy',b:'#dcd8d0',m:'#8d8a86',rare:1},kary:{n:'Fryz kary',b:'#2f2926',m:'#0f0d0c',rare:1},izabel:{n:'Izabelowaty',b:'#e6c47e',m:'#fff4d6',rare:1}};
-const ITEMS=[{id:'ribbon',n:'Wstążka w grzywie',p:10},{id:'tailbow',n:'Kokarda na ogonie',p:12},{id:'socks',n:'Białe skarpetki',p:15},{id:'blaze',n:'Gwiazdka na czole',p:15},{id:'flowers',n:'Wianek z kwiatów',p:20},{id:'blanket',n:'Zielona derka',p:25,g:'b'},{id:'blanket2',n:'Czerwona derka w gwiazdki',p:30,g:'b'},{id:'hat',n:'Kapelusz kowbojski',p:35,g:'h'},{id:'tophat',n:'Cylinder',p:45,g:'h'},{id:'saddle',n:'Siodło klasyczne',p:40,g:'s'},{id:'saddle2',n:'Siodło westernowe',p:60,g:'s'},{id:'saddle3',n:'Siodło różowe ze złotem',p:80,g:'s'}];
+const ITEMS=[{id:'ribbon',n:'Wstążka w grzywie',p:10},{id:'tailbow',n:'Kokarda na ogonie',p:12},{id:'socks',n:'Białe skarpetki',p:15},{id:'blaze',n:'Gwiazdka na czole',p:15},{id:'flowers',n:'Kwiatki w grzywie',p:20},{id:'tailflowers',n:'Kwiatki na ogonie',p:20},{id:'blanket',n:'Zielona derka',p:25,g:'b'},{id:'blanket2',n:'Czerwona derka w gwiazdki',p:30,g:'b'},{id:'hat',n:'Kapelusz kowbojski',p:35,g:'h'},{id:'tophat',n:'Cylinder',p:45,g:'h'},{id:'saddle',n:'Siodło klasyczne',p:40,g:'s'},{id:'saddle2',n:'Siodło westernowe',p:60,g:'s'},{id:'saddle3',n:'Siodło różowe ze złotem',p:80,g:'s'}];
 const LV=[{xp:0,n:'Stara szopa',u:'Pierwszy boks i trening na padoku'},{xp:10,n:'Drugi boks',u:'Miejsce na drugiego konia'},
  {xp:25,n:'Siodlarnia',u:'Ozdoby dla koni za marchewki'},{xp:45,n:'Tor wyścigowy',u:'Wyścig lokalny i trzeci boks'},
  {xp:70,n:'Czwarty boks',u:'Miejsce na czwartego konia'},{xp:100,n:'Tor przeszkód',u:'Skoki: pisanie słówek z pamięci'},
@@ -365,7 +365,7 @@ function fxAnswer(ok,btn){sfx(ok?'ok':'no');replay($('#buddy'),ok?'hop':'sad');
 function horseSVG(h,cls){const c=COATS[h.coat]||COATS.kasztan,a=h.acc||[],has=x=>a.includes(x);
  const leg=(x,k,d)=>`<g class="leg ${k}"><rect x="${x}" y="100" width="12" height="46" rx="5" fill="${d?c.m:c.b}" opacity="${d?.55:1}"/>${has('socks')?`<rect x="${x}" y="128" width="12" height="12" fill="#fff"/>`:''}<rect x="${x-1}" y="140" width="14" height="8" rx="3" fill="#2b1d14"/></g>`;
  return `<svg class="${cls||'idle'}" viewBox="0 0 224 156" role="img" aria-label="Koń ${esc(h.name||'')}">
- <path class="tail" d="M52 76 C24 78 18 118 30 142 C36 120 46 104 60 92Z" fill="${c.m}"/>
+ <g class="tail"><path d="M52 76 C24 78 18 118 30 142 C36 120 46 104 60 92Z" fill="${c.m}"/>${has('tailflowers')?[[42,88],[33,102],[29,118],[31,133]].map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="5" fill="${['#e84a8a','#fff','#ffd54a','#fff'][i]}"/><circle cx="${p[0]}" cy="${p[1]}" r="2" fill="#ef7d22"/>`).join(''):''}</g>
  ${leg(72,'a',1)}${leg(150,'b',1)}${leg(86,'b')}${leg(138,'a')}
  <ellipse cx="110" cy="88" rx="58" ry="30" fill="${c.b}"/>
  <path d="M138 74 L166 26 L194 40 L166 100Z" fill="${c.b}"/>
