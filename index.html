@@ -343,7 +343,7 @@ const BADV=/albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|org
 function enVoices(){try{const sc=v=>(/natural|premium|enhanced|neural|siri/i.test(v.name)?8:0)+(GOODV.test(v.name)?5:0)+(/^en[-_]GB/i.test(v.lang)?2:/^en[-_]US/i.test(v.lang)?1:0);
  return speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang)&&!BADV.test(v.name+' '+(v.voiceURI||''))).sort((a,b)=>sc(b)-sc(a));}catch(e){return [];}}
 function voicesReady(){const had=canSpeak;canSpeak=speechApi&&enVoices().length>0;if(canSpeak!==had&&S&&!sess&&$('#login').hidden&&$('#modal').hidden)render();}
-function speak(t){if(!canSpeak||S.voiceOff)return;try{speechSynthesis.cancel();const vs=enVoices(),v=vs.find(x=>x.name===S.voice)||vs[0];if(!v)return;const u=new SpeechSynthesisUtterance(t.replace(/\.\.\./g,'').replace(/\+.*$/,''));u.voice=v;u.lang=v.lang;u.rate=.85;speechSynthesis.speak(u);}catch(e){}}
+function speak(t){if(!canSpeak||S.voiceOff)return;try{speechSynthesis.cancel();const vs=enVoices(),v=vs.find(x=>x.name===S.voice)||vs[0];if(!v)return;const u=new SpeechSynthesisUtterance(t.replace(/\.\.\./g,'').replace(/\+.*$/,''));u.voice=v;u.lang=v.lang;u.rate=S.rate||.7;speechSynthesis.speak(u);}catch(e){}}
 
 /* ---------- efekty: dźwięki, konfetti, napisy ---------- */
 let AC=null;
@@ -579,7 +579,7 @@ function parentPanel(){parentOpen=true;const hard=pool().map(w=>({w,n:(S.words[w
  <label><input type="checkbox" id="unlockall" ${S.unlockAll?'checked':''}> Otwórz od razu wszystkie boksy (np. przed klasówką)</label>
  <h3>Najtrudniejsze słówka</h3>${hard.length?'<ul>'+hard.map(x=>`<li>${esc(x.w.en)} – ${esc(x.w.pl)} (błędy: ${x.n})</li>`).join('')+'</ul>':'<p class="small">Na razie brak pomyłek.</p>'}
  <h3>Dźwięki</h3><label><input type="checkbox" id="soundoff" ${S.soundOff?'checked':''}> Wyłącz dźwięki gry</label>
- <h3>Lektor</h3>${canSpeak?`<label><input type="checkbox" id="voiceoff" ${S.voiceOff?'checked':''}> Wyłącz lektora</label><div class="chips">${enVoices().slice(0,10).map((v,i)=>`<button class="chip" data-act="voice" data-name="${esc(v.name)}" aria-pressed="${(S.voice||(enVoices()[0]||{}).name)===v.name}">${esc(v.name.replace(/Microsoft |Google /,''))}</button>`).join('')||'<span class="small">To urządzenie nie ma angielskich głosów.</span>'}</div><p class="small">Dotknij głosu, żeby go usłyszeć i wybrać. Lista zależy od urządzenia.</p>`:'<p class="small">Ta przeglądarka nie obsługuje lektora.</p>'}
+ <h3>Lektor</h3>${canSpeak?`<label><input type="checkbox" id="voiceoff" ${S.voiceOff?'checked':''}> Wyłącz lektora</label><div class="chips">${enVoices().slice(0,10).map((v,i)=>`<button class="chip" data-act="voice" data-name="${esc(v.name)}" aria-pressed="${(S.voice||(enVoices()[0]||{}).name)===v.name}">${esc(v.name.replace(/Microsoft |Google /,''))}</button>`).join('')||'<span class="small">To urządzenie nie ma angielskich głosów.</span>'}</div><p class="small">Dotknij głosu, żeby go usłyszeć i wybrać. Lista zależy od urządzenia.</p><p class="small">Tempo czytania</p><div class="chips">${[[.5,'Bardzo wolno'],[.6,'Wolno'],[.7,'Spokojnie'],[.85,'Normalnie']].map(r=>`<button class="chip" data-act="rate" data-r="${r[0]}" aria-pressed="${(S.rate||.7)===r[0]}">${r[1]}</button>`).join('')}</div>`:'<p class="small">Ta przeglądarka nie obsługuje lektora.</p>'}
  <h3>Dodaj własne słówko</h3><div class="rowf"><input id="cen" type="text" placeholder="po angielsku" autocapitalize="off" aria-label="Słówko po angielsku"><input id="cpl" type="text" placeholder="po polsku" autocapitalize="off" aria-label="Słówko po polsku"><button class="btn" data-act="addword" style="flex:none">Dodaj</button></div>
  ${S.custom.length?'<ul>'+S.custom.map((c,i)=>`<li>${esc(c.en)} – ${esc(c.pl)} <button class="chip" data-act="delword" data-i="${i}">usuń</button></li>`).join('')+'</ul>':''}
  <h3>Konto</h3><p class="small">${AUTH?'Zalogowano: '+esc(AUTH.email||''):'Gra bez logowania.'}</p><div class="acts"><button class="btn alt" data-act="logout">${AUTH?'Wyloguj':'Zaloguj się'}</button></div>
@@ -604,6 +604,7 @@ const A={
  voice:d=>{S.voice=d.name;S.voiceOff=false;save();speak('a bunch of flowers from the florist');parentPanel();},
  guest:()=>{authStore(null);start();},
  logout:()=>{clearTimeout(save.t);const p=AUTH&&S.ts?pushCloud():Promise.resolve();p.then(()=>{authStore(null);showLogin();});},
+ rate:d=>{S.rate=+d.r;save();speak('a bunch of flowers from the florist');parentPanel();},
  parent:()=>parentGate(),pinok:()=>pinOk(),close:()=>{closeModal();render();},
  addword:()=>{const en=$('#cen').value.trim(),pl=$('#cpl').value.trim();if(!en||!pl)return toast('Wpisz słówko po angielsku i po polsku.');if(S.custom.find(c=>norm(c.en)===norm(en)))return toast('To słówko już jest na liście.');S.custom.push({en,pl});S.active.own=true;save();parentPanel();},
  delword:d=>{const c=S.custom.splice(+d.i,1)[0];if(c)delete S.words['own:'+c.en];save();parentPanel();},
